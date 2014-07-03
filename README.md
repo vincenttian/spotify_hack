@@ -5,12 +5,6 @@
 Node.js Authentication:
 http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local
 
-Github Passport API:
-https://github.com/jaredhanson/passport-github/
-
-Github API:
-https://github.com/mikedeboer/node-github/
-
 Mongoose Docs:
 http://mongoosejs.com/docs/
 
