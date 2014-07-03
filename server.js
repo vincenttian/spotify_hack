@@ -4,7 +4,7 @@
 // get all the tools we need
 var express = require('express');
 var app = express();
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 3000;
 var mongoose = require('mongoose');
 var passport = require('passport');
 var flash = require('connect-flash');
@@ -39,10 +39,15 @@ app.listen(port);
 console.log('The magic happens on port ' + port);
 
 // database ====================================================================
-mongoose.connect("mongodb://localhost:27017/health");
-var MongoClient = require('mongodb').MongoClient;
-MongoClient.connect("mongodb://localhost:27017/health", function(err, db) {
-    if (!err) {
-        console.log("MongoDB is connected");
-    }
+var mongoUri = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/test';
+mongoose.connect(mongoUri);
+var mongo = require('mongodb');
+mongo.Db.connect(mongoUri, function(err, db) {
+    db.collection('mydocs', function(er, collection) {
+        collection.insert({
+            'mykey': 'myvalue'
+        }, {
+            safe: true
+        }, function(er, rs) {});
+    });
 });

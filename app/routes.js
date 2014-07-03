@@ -65,9 +65,10 @@ module.exports = function(app, passport) {
     // handle the callback after facebook has authenticated the user
     app.get('/auth/facebook/callback',
         passport.authenticate('facebook', {
-            successRedirect: '/profile',
             failureRedirect: '/'
-        }));
+        }), function(req, res) {
+            res.redirect('/profile');
+        });
 
     // twitter --------------------------------
 
@@ -79,9 +80,10 @@ module.exports = function(app, passport) {
     // handle the callback after twitter has authenticated the user
     app.get('/auth/twitter/callback',
         passport.authenticate('twitter', {
-            successRedirect: '/profile',
             failureRedirect: '/'
-        }));
+        }), function(req, res) {
+            res.redirect('/profile');
+        });
 
 
     // google ---------------------------------
@@ -94,16 +96,17 @@ module.exports = function(app, passport) {
     // the callback after google has authenticated the user
     app.get('/auth/google/callback',
         passport.authenticate('google', {
-            successRedirect: '/profile',
             failureRedirect: '/'
-        }));
+        }), function(req, res) {
+            res.redirect('/profile');
+        });
 
     // =============================================================================
     // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
     // =============================================================================
 
     // locally --------------------------------
-    app.get('/connect/local', function(req, res) {
+    app.get('/connect/local', isLoggedIn, function(req, res) {
         res.render('connect-local.ejs', {
             message: req.flash('loginMessage')
         });
@@ -117,7 +120,7 @@ module.exports = function(app, passport) {
     // facebook -------------------------------
 
     // send to facebook to do the authentication
-    app.get('/connect/facebook', passport.authorize('facebook', {
+    app.get('/connect/facebook', isLoggedIn, passport.authorize('facebook', {
         scope: 'email'
     }));
 
@@ -131,7 +134,7 @@ module.exports = function(app, passport) {
     // twitter --------------------------------
 
     // send to twitter to do the authentication
-    app.get('/connect/twitter', passport.authorize('twitter', {
+    app.get('/connect/twitter', isLoggedIn, passport.authorize('twitter', {
         scope: 'email'
     }));
 
@@ -146,7 +149,7 @@ module.exports = function(app, passport) {
     // google ---------------------------------
 
     // send to google to do the authentication
-    app.get('/connect/google', passport.authorize('google', {
+    app.get('/connect/google', isLoggedIn, passport.authorize('google', {
         scope: ['profile', 'email']
     }));
 
@@ -165,7 +168,7 @@ module.exports = function(app, passport) {
     // user account will stay active in case they want to reconnect in the future
 
     // local -----------------------------------
-    app.get('/unlink/local', function(req, res) {
+    app.get('/unlink/local', isLoggedIn, function(req, res) {
         var user = req.user;
         user.local.email = undefined;
         user.local.password = undefined;
@@ -175,7 +178,7 @@ module.exports = function(app, passport) {
     });
 
     // facebook -------------------------------
-    app.get('/unlink/facebook', function(req, res) {
+    app.get('/unlink/facebook', isLoggedIn, function(req, res) {
         var user = req.user;
         user.facebook.token = undefined;
         user.save(function(err) {
@@ -184,7 +187,7 @@ module.exports = function(app, passport) {
     });
 
     // twitter --------------------------------
-    app.get('/unlink/twitter', function(req, res) {
+    app.get('/unlink/twitter', isLoggedIn, function(req, res) {
         var user = req.user;
         user.twitter.token = undefined;
         user.save(function(err) {
@@ -193,15 +196,13 @@ module.exports = function(app, passport) {
     });
 
     // google ---------------------------------
-    app.get('/unlink/google', function(req, res) {
+    app.get('/unlink/google', isLoggedIn, function(req, res) {
         var user = req.user;
         user.google.token = undefined;
         user.save(function(err) {
             res.redirect('/profile');
         });
     });
-
-
 };
 
 // route middleware to ensure user is logged in
@@ -209,6 +210,5 @@ module.exports = function(app, passport) {
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();
-
     res.redirect('/');
 }
