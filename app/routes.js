@@ -1,6 +1,14 @@
 module.exports = function(app, passport) {
 
     // normal routes ===============================================================
+    var controller1 = require('../app/controllers/controller1');
+    app.get('/controller1', controller1.route1);
+
+    var controller2 = require('../app/controllers/controller2');
+    app.get('/controller2', controller1.route1);
+
+    var controller3 = require('../app/controllers/controller3');
+    app.get('/controller3', controller1.route1);
 
     // show the home page (will also have our login links)
     app.get('/', function(req, res) {
