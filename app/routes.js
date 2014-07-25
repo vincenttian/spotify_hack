@@ -109,6 +109,20 @@ module.exports = function(app, passport) {
             res.redirect('/profile');
         });
 
+
+    // spotify ---------------------------------
+
+    // send to spotify to do the authentication
+    app.get('/auth/spotify', passport.authenticate('spotify'));
+
+    // the callback after spotify has authenticated the user
+    app.get('/auth/spotify/callback',
+        passport.authenticate('spotify', {
+            failureRedirect: '/'
+        }), function(req, res) {
+            res.redirect('/profile');
+        });
+
     // =============================================================================
     // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
     // =============================================================================
@@ -168,6 +182,18 @@ module.exports = function(app, passport) {
             failureRedirect: '/'
         }));
 
+    // spotify ---------------------------------
+
+    // send to spotify to do the authentication
+    app.get('/connect/spotify', isLoggedIn, passport.authorize('spotify'));
+
+    // the callback after spotify has authorized the user
+    app.get('/connect/spotify/callback',
+        passport.authorize('spotify', {
+            successRedirect: '/profile',
+            failureRedirect: '/'
+        }));
+
     // =============================================================================
     // UNLINK ACCOUNTS =============================================================
     // =============================================================================
@@ -207,6 +233,15 @@ module.exports = function(app, passport) {
     app.get('/unlink/google', isLoggedIn, function(req, res) {
         var user = req.user;
         user.google.token = undefined;
+        user.save(function(err) {
+            res.redirect('/profile');
+        });
+    });
+
+    // spotify ---------------------------------
+    app.get('/unlink/spotify', isLoggedIn, function(req, res) {
+        var user = req.user;
+        user.spotify.token = undefined;
         user.save(function(err) {
             res.redirect('/profile');
         });

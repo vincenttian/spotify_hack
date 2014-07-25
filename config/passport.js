@@ -3,6 +3,7 @@ var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var SpotifyStrategy = require('passport-spotify').Strategy;
 
 // load up the user model
 var User = require('../app/models/user');
@@ -290,6 +291,68 @@ module.exports = function(passport) {
                     user.google.token = token;
                     user.google.name = profile.displayName;
                     user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+                    user.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, user);
+                    });
+                }
+            });
+        }));
+
+    // =========================================================================
+    // Spotify =================================================================
+    // =========================================================================
+    passport.use(new SpotifyStrategy({
+            clientID: configAuth.spotify.clientID,
+            clientSecret: configAuth.spotify.clientSecret,
+            callbackURL: configAuth.spotify.callbackURL,
+            passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+
+        },
+        function(req, token, refreshToken, profile, done) {
+            // asynchronous
+            process.nextTick(function() {
+                // check if the user is already logged in
+                if (!req.user) {
+                    User.findOne({
+                        'spotify.id': profile.id
+                    }, function(err, user) {
+                        if (err)
+                            return done(err);
+                        if (user) {
+                            // if there is a user id already but no token (user was linked at one point and then removed)
+                            if (!user.spotify.token) {
+                                user.spotify.token = token;
+                                // user.spotify.name = profile.displayName;
+                                // user.spotify.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+                                user.save(function(err) {
+                                    if (err)
+                                        throw err;
+                                    return done(null, user);
+                                });
+                            }
+                            return done(null, user);
+                        } else {
+                            var newUser = new User();
+                            newUser.spotify.id = profile.id;
+                            newUser.spotify.token = token;
+                            // newUser.spotify.name = profile.displayName;
+                            // newUser.spotify.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+                            newUser.save(function(err) {
+                                if (err)
+                                    throw err;
+                                return done(null, newUser);
+                            });
+                        }
+                    });
+                } else {
+                    // user already exists and is logged in, we have to link accounts
+                    var user = req.user; // pull the user out of the session
+                    user.spotify.id = profile.id;
+                    user.spotify.token = token;
+                    // user.spotify.name = profile.displayName;
+                    // user.spotify.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
                     user.save(function(err) {
                         if (err)
                             throw err;
