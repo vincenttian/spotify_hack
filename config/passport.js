@@ -303,6 +303,9 @@ module.exports = function(passport) {
     // =========================================================================
     // Spotify =================================================================
     // =========================================================================
+
+    var SpotifyWebApi = require('spotify-web-api-node');
+
     passport.use(new SpotifyStrategy({
             clientID: configAuth.spotify.clientID,
             clientSecret: configAuth.spotify.clientSecret,
@@ -312,6 +315,23 @@ module.exports = function(passport) {
         },
         function(req, token, refreshToken, profile, done) {
             // asynchronous
+
+
+
+            var spotifyApi = new SpotifyWebApi();
+            spotifyApi.setAccessToken(token);
+            spotifyApi.getMe()
+                .then(function(data) {
+                    console.log('Some information about the authenticated user', data);
+                }, function(err) {
+                    console.log('Something went wrong!', err);
+                });
+
+
+
+
+
+
             process.nextTick(function() {
                 // check if the user is already logged in
                 if (!req.user) {

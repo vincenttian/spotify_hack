@@ -8,6 +8,11 @@ http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local
 Mongoose Docs:
 http://mongoosejs.com/docs/
 
+Spotify Wrapper API:
+https://github.com/thelinmichael/spotify-web-api-node
+
+Spotify Passport:
+https://github.com/jmperez/passport-spotify
 
 ###MongoDB
 
